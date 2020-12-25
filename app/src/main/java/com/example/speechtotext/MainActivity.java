@@ -10,7 +10,10 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,11 +29,14 @@ import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.Locale;
 
-// Memanggil kelas speech recognizer untuk merecord audio
+
 public class MainActivity extends AppCompatActivity {
+    // Membuat objek atau variabel
     public static final Integer RecordAudioRequestCode = 1;
+    private static final int REQUEST_WRITE_PERMISSION = 786;
 
     private SpeechRecognizer speechRecognizer;
+    ArrayList<String> arrayList;
 
     // Memanggil atribut
     EditText editText;
@@ -38,20 +44,24 @@ public class MainActivity extends AppCompatActivity {
     AlertDialog.Builder alertSpeechDialog;
     AlertDialog alertDialog;
 
+    String words;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Inisialisasi Objek
         editText = findViewById(R.id.EditText);
         imageView = findViewById(R.id.imageView);
 
+        // Chek mic permission
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             checkPermission();
         }
 
-        // Membangun speech recognizer
+
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
 
         final Intent speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -109,6 +119,10 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<String> arrayList = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 editText.setText(arrayList.get(0));
                 alertDialog.dismiss();
+
+                words = arrayList.get(0);
+                Log.d("TAG", "onResults Speech: "+words);
+
             }
 
             @Override
@@ -121,7 +135,8 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        // Sentuh mic untuk memulai
+
+        //Method Sentuh mic untuk memulai
         imageView.setOnTouchListener(new View.OnTouchListener() {
             @SuppressLint("ClickableViewAccessibility")
             @Override
@@ -139,6 +154,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_word_cloud:
+                if (words == null || words == "") {
+                    Toast.makeText(this, "You must speak some text before going to Words Cloud Menu", Toast.LENGTH_LONG).show();
+                } else {
+                    Intent i = new Intent(MainActivity.this, WordCloudActivity.class);
+                    i.putExtra("words", words);
+                    startActivity(i);
+                }
+        }
+        return true;
+    }
+
 
     // Request untuk allow record audio
     private void checkPermission() {

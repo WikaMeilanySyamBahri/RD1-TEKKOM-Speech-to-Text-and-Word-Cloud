@@ -1,4 +1,4 @@
 package com.example.speechtotext;
 
-public class Main2Activity {
+public class WordCloudActivity {
 }

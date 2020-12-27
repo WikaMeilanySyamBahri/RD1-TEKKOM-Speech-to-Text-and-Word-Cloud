@@ -3,10 +3,13 @@ package com.example.speechtotext;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -26,6 +29,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -37,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SpeechRecognizer speechRecognizer;
     ArrayList<String> arrayList;
+
 
     // Memanggil atribut
     EditText editText;
@@ -60,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             checkPermission();
         }
+        requestPermission();
 
 
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
@@ -112,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
             public void onError(int error) {
 
             }
+
             // Result speech diubah ke dalam teks
             @Override
             public void onResults(Bundle bundle) {
@@ -121,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 alertDialog.dismiss();
 
                 words = arrayList.get(0);
-                Log.d("TAG", "onResults Speech: "+words);
+                Log.d("TAG", "onResults Speech: " + words);
 
             }
 
@@ -173,8 +181,40 @@ public class MainActivity extends AppCompatActivity {
                     i.putExtra("words", words);
                     startActivity(i);
                 }
+                return true;
+            case R.id.menu_save_file:
+                if (words == null || words == "") {
+                    showDialogInputNameFile(this);
+                } else {
+                    writeFile(getApplicationContext(), "my-words-clouds.txt", words);
+                    //writeFileOnInternalStorage(this, "my-words-clouds", words);
+                }
         }
         return true;
+    }
+
+    public void writeFile(Context mcoContext, String sFileName, String sBody) {
+        File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "WordCloudFolder");
+
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Toast.makeText(this, "Error Make A Folder! try again", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "Success make a Folder", Toast.LENGTH_SHORT).show();
+        }
+
+        try {
+            File gpxfile = new File(mediaStorageDir, sFileName);
+            FileWriter writer = new FileWriter(gpxfile);
+            writer.append(sBody);
+            writer.flush();
+            writer.close();
+            Toast.makeText(mcoContext, "Success!", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(mcoContext, "Error!", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
     }
 
 
@@ -202,7 +242,36 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
             }
         }
+        if (requestCode == REQUEST_WRITE_PERMISSION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            //Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void requestPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_PERMISSION);
+        } else {
+            //Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showDialogInputNameFile(Context context){
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(context);
+        builder1.setMessage("Please speech some words first, before saving to file");
+        builder1.setCancelable(true);
+
+        builder1.setNegativeButton(
+                "Close",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
     }
 }
+
 
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/menu_words_cloud"
+        android:icon="@drawable/ic_baseline_cloud"
+        android:title="@string/words_cloud"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_save_file"
+        android:icon="@drawable/ic_baseline_save"
+        android:title="@string/save"
+        app:showAsAction="always"/>
+
+    <item android:id="@+id/menu_exit"
+        android:icon="@drawable/ic_baseline_close"
+        android:title="@string/exit"
+        app:showAsAction="always"/>
+
+
+
+</menu>

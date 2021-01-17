@@ -1,1 +1,0 @@
-# RD1-TEKKOM-Speech-to-Text-and-Word-Cloud
